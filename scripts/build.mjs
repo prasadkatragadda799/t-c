@@ -27,10 +27,20 @@ async function main() {
 
   await rimraf(publicDir);
   await fs.mkdir(publicDir, { recursive: true });
+  await fs.mkdir(path.join(publicDir, "t&c"), { recursive: true });
 
   // Copy static assets
   await fs.copyFile(path.join(rootDir, "index.html"), path.join(publicDir, "index.html"));
   await fs.copyFile(path.join(rootDir, "styles.css"), path.join(publicDir, "styles.css"));
+  // Copy local images used in HTML
+  await fs.copyFile(
+    path.join(rootDir, "t&c", "IMG_4045.JPG.jpeg"),
+    path.join(publicDir, "t&c", "IMG_4045.JPG.jpeg")
+  );
+  await fs.copyFile(
+    path.join(rootDir, "t&c", "WhatsApp Image 2026-02-26 at 12.44.30.jpeg"),
+    path.join(publicDir, "t&c", "WhatsApp Image 2026-02-26 at 12.44.30.jpeg")
+  );
 
   // Compile TypeScript -> public/script.js
   const nodeBin = process.execPath;
