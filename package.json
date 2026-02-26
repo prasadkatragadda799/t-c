@@ -1,7 +1,10 @@
 {
+  "name": "t-and-c",
+  "private": true,
   "scripts": {
     "dev": "python3 -m http.server 5173",
-    "build": "tsc",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "watch": "tsc -w"
   },
   "devDependencies": {
