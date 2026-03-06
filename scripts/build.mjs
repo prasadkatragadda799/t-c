@@ -22,25 +22,49 @@ async function rimraf(targetPath) {
   await fs.rm(targetPath, { recursive: true, force: true });
 }
 
+async function copyImageAssets(sourceDir, targetDir) {
+  const imageExtensions = new Set([
+    ".avif",
+    ".gif",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".svg",
+    ".webp",
+  ]);
+
+  const entries = await fs.readdir(sourceDir, { withFileTypes: true });
+
+  await Promise.all(
+    entries.map(async (entry) => {
+      if (!entry.isFile()) {
+        return;
+      }
+
+      const extension = path.extname(entry.name).toLowerCase();
+      if (!imageExtensions.has(extension)) {
+        return;
+      }
+
+      await fs.copyFile(path.join(sourceDir, entry.name), path.join(targetDir, entry.name));
+    })
+  );
+}
+
 async function main() {
   const publicDir = path.join(rootDir, "public");
+  const sourceAssetDir = path.join(rootDir, "t&c");
+  const targetAssetDir = path.join(publicDir, "t&c");
 
   await rimraf(publicDir);
   await fs.mkdir(publicDir, { recursive: true });
-  await fs.mkdir(path.join(publicDir, "t&c"), { recursive: true });
+  await fs.mkdir(targetAssetDir, { recursive: true });
 
   // Copy static assets
   await fs.copyFile(path.join(rootDir, "index.html"), path.join(publicDir, "index.html"));
   await fs.copyFile(path.join(rootDir, "styles.css"), path.join(publicDir, "styles.css"));
-  // Copy local images used in HTML
-  await fs.copyFile(
-    path.join(rootDir, "t&c", "IMG_4045.JPG.jpeg"),
-    path.join(publicDir, "t&c", "IMG_4045.JPG.jpeg")
-  );
-  await fs.copyFile(
-    path.join(rootDir, "t&c", "WhatsApp Image 2026-02-26 at 12.44.30.jpeg"),
-    path.join(publicDir, "t&c", "WhatsApp Image 2026-02-26 at 12.44.30.jpeg")
-  );
+  // Mirror image assets referenced from index.html into the production output.
+  await copyImageAssets(sourceAssetDir, targetAssetDir);
 
   // Compile TypeScript -> public/script.js
   const nodeBin = process.execPath;
@@ -52,4 +76,3 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-
